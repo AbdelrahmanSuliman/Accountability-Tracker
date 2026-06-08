@@ -1,9 +1,8 @@
+import { config } from './config/index';
 import express from "express";
-import dotenv from "dotenv";
 import morgan from "morgan";
 import helmet from "helmet";
-
-dotenv.config();
+import { drizzle } from "drizzle-orm/node-postgres";
 
 const app = express();
 
@@ -12,6 +11,10 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 app.use(express.json());
+
+const db = drizzle(config.database.url);
+
+
 
 
 export default app;
