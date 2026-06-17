@@ -14,5 +14,7 @@ app.use(express.json());
 
 const db = drizzle(config.database.url);
 
-
+app.listen(config.port, () => {
+    console.log(`Server is running on port ${config.port}`)
+})
 export default app;
