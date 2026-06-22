@@ -10,6 +10,7 @@ const timestamps = {
 export const users = t.pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
   email: t.varchar({ length: 255 }).notNull().unique(),
+  username: t.varchar({ length: 255}).notNull(),
   passwordHash: t.varchar("password_hash", { length: 255 }).notNull(),
   isOnboarded: t.boolean("is_onboarded").default(false),
   ...timestamps,
