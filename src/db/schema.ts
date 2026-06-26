@@ -33,7 +33,7 @@ export const journalEntries = t.pgTable("journal_entries", {
   ...timestamps,
 });
 
-const relations = defineRelations({ users, addictions, journalEntries }, (r) => ({
+export const relations = defineRelations({ users, addictions, journalEntries }, (r) => ({
   addictions: {
     user: r.one.users({
       from: r.addictions.userId,
