@@ -1,3 +1,5 @@
+import { StatusCodes } from 'http-status-codes';
+
 export class AppError extends Error {
   statusCode: number;
   constructor(message: string, statusCode: number) {
@@ -9,6 +11,6 @@ export class AppError extends Error {
 
 export class AuthenticationError extends AppError {
   constructor(message: string = "Invalid Email or Password") {
-      super(message, 401)
+      super(message, StatusCodes.UNAUTHORIZED)
   }
 }
