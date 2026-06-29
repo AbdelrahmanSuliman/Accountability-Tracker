@@ -1,17 +1,24 @@
 import express from "express";
-import dotenv from "dotenv";
-import morgan from "morgan";
 import helmet from "helmet";
-
-dotenv.config();
-
+import config from "./config/index";
+import logger from "./util/logger";
+import errorHandler from "./middleware/error.handler";
+import authRouter from "./routes/auth.routes";
 const app = express();
 
+//Global Middleware
 app.use(helmet());
-
-app.use(morgan("dev"));
-
 app.use(express.json());
 
+//Router Mounting
+const router = express.Router();
+router.use("/auth", authRouter)
+app.use("/api/v1", router);
+
+app.use(errorHandler);
+
+app.listen(config.port, () => {
+  logger.info(`Server is running on port ${config.port}`);
+});
 
 export default app;
