@@ -14,3 +14,11 @@ export class AuthenticationError extends AppError {
       super(message, StatusCodes.UNAUTHORIZED)
   }
 }
+
+export class ValidationError extends AppError {
+  errorMessages: string[];
+  constructor(errorMessages: string[], message: string = "Invalid data") {
+    super(message, StatusCodes.BAD_REQUEST);
+    this.errorMessages = errorMessages;
+  }
+}
