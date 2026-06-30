@@ -1,12 +1,35 @@
 import * as z from "zod";
 
+const minLength = 6;
+const maxLength = 255;
+
 export const userLoginSchema = z.object({
-  email: z.email().nonempty().min(6).max(255),
-  password: z.string().nonempty().min(6).max(255),
+  email: z
+    .email()
+    .nonempty("Email is required")
+    .min(minLength, `Email must be at least ${minLength} characters long`)
+    .max(maxLength),
+  password: z
+    .string()
+    .nonempty("Password is required")
+    .min(minLength, `Passowrd must be at least ${minLength} characters long`)
+    .max(maxLength),
 });
 
 export const userSignupSchema = z.object({
-  username: z.string().nonempty().min(6).max(255),
-  email: z.email().nonempty().min(6).max(255),
-  password: z.string().nonempty().min(6).max(255),
+  username: z
+    .string()
+    .nonempty("Username is required")
+    .min(minLength, `Username must be at least ${minLength} characters long`)
+    .max(255),
+  email: z
+    .email("Invalid email format")
+    .nonempty("Email is required")
+    .min(minLength, `Email must be at least ${minLength} characters long`)
+    .max(255),
+  password: z
+    .string()
+    .nonempty("Password is required")
+    .min(minLength, `Password must be at least ${minLength} characters long`)
+    .max(255),
 });

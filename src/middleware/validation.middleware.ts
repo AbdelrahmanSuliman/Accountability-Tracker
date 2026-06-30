@@ -1,7 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import type { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
-import { ValidationError } from "../util/error";
+import { ValidationError, type FieldErrors } from "../util/error";
+import logger from "../util/logger";
 
 export function validateData(schema: z.ZodObject<any, any>) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -10,9 +11,7 @@ export function validateData(schema: z.ZodObject<any, any>) {
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        const errorMessages: string[] = err.issues.map((issue) => {
-          return `${issue.path}: ${issue.message}`;
-        });
+        const errorMessages: FieldErrors = z.flattenError(err).fieldErrors
         next(new ValidationError(errorMessages));
       } else {
         next(err);
