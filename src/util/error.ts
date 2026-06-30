@@ -1,5 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 
+export type FieldErrors = Record<string, string[]>
+
 export class AppError extends Error {
   statusCode: number;
   constructor(message: string, statusCode: number) {
@@ -20,8 +22,8 @@ export class AuthenticationError extends AppError {
 }
 
 export class ValidationError extends AppError {
-  errorMessages: string[];
-  constructor(errorMessages: string[], message: string = "Invalid data") {
+  errorMessages: FieldErrors;
+  constructor(errorMessages: FieldErrors, message: string = "Invalid data") {
     super(message, StatusCodes.BAD_REQUEST);
     this.errorMessages = errorMessages;
   }
