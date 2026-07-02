@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { signupService, loginService } from "../services/auth.services";
 import { StatusCodes } from "http-status-codes";
+import generateToken from "../util/generateToken";
 
 export async function signupController(
   req: Request,
@@ -11,7 +12,8 @@ export async function signupController(
 
   try {
     const user = await signupService(username, email, password);
-    res.status(StatusCodes.CREATED).send({ user });
+    const token = generateToken(user.id, user.username);
+    res.status(StatusCodes.CREATED).send({ user, token });
   } catch (err) {
     next(err);
   }
@@ -24,9 +26,10 @@ export async function loginController(
 ) {
   const { email, password } = req.body;
   try {
-    const user = await loginService(email, password)
-    res.status(StatusCodes.OK).send({user})
+    const user = await loginService(email, password);
+    const token = generateToken(user.id, user.username);
+    res.status(StatusCodes.OK).send({ user, token });
   } catch (err) {
-    next(err)
+    next(err);
   }
 }
