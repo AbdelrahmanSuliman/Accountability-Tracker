@@ -31,6 +31,9 @@ export async function signupService(
         email: users.email,
       });
 
+    if (!newUser) {
+      throw new AppError("Failed to create user", 500);
+    }
     return newUser;
   } catch (err) {
     if (err instanceof AuthenticationError) {
@@ -50,6 +53,7 @@ export async function loginService(email: string, password: string) {
       columns: {
         id: true,
         email: true,
+        username: true,
         passwordHash: true,
       },
     });
@@ -64,6 +68,7 @@ export async function loginService(email: string, password: string) {
     return {
       id: user.id,
       email: user.email,
+      username: user.username
     };
   } catch (err) {
     if (err instanceof AuthenticationError) {

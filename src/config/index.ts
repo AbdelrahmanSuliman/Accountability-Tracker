@@ -8,7 +8,11 @@ export const config = {
   database: {
     url: process.env.DATABASE_URL || "",
   },
-  saltRounds: process.env.SALT_ROUNDS || "10"
+  saltRounds: process.env.SALT_ROUNDS || "10",
+  jwt: {
+    expiresIn: process.env.JWT_EXPIRATION_TIME || "1h",
+    secretKey: process.env.JWT_SECRET as any
+  }
 };
 
 export default config

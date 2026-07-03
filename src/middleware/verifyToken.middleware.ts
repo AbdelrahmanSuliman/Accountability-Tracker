@@ -1,0 +1,34 @@
+import type { UserPayload } from "./../schema/user.payload";
+import jwt from "jsonwebtoken";
+import { AuthenticationError } from "./../util/error";
+import type { Request, Response, NextFunction } from "express";
+import config from "../config";
+import logger from "../util/logger";
+
+export interface AuthenticatedRequest extends Request {
+  user?: UserPayload;
+}
+
+export default function verifyToken(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    next(new AuthenticationError("Token required"));
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.jwt.secretKey) as UserPayload;
+
+    req.user = decoded;
+
+    next();
+  } catch (err) {
+    next(new AuthenticationError("Invalid or expired token"));
+  }
+}
