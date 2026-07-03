@@ -19,8 +19,8 @@ export const users = t.pgTable("users", {
 export const addictions = t.pgTable("addictions", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
   name: t.varchar({ length: 255 }).notNull(),
-  userId: t.integer("user_id").references(() => users.id),
-  partnerId: t.integer("partner_id").references(() => users.id),
+  userId: t.integer("user_id").references(() => users.id, {onDelete: "cascade"}).notNull(),
+  partnerId: t.integer("partner_id").references(() => users.id, {onDelete: "cascade"}).notNull(),
   ...timestamps,
 });
 
