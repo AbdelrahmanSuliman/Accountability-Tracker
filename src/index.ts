@@ -4,6 +4,7 @@ import config from "./config/index";
 import logger from "./util/logger";
 import errorHandler from "./middleware/error.handler";
 import authRouter from "./routes/auth.routes";
+import addictionRouter from "./routes/addiction.routes";
 const app = express();
 
 //Global Middleware
@@ -13,6 +14,7 @@ app.use(express.json());
 //Router Mounting
 const router = express.Router();
 router.use("/auth", authRouter)
+router.use("/addiction", addictionRouter )
 app.use("/api/v1", router);
 
 app.use(errorHandler);
