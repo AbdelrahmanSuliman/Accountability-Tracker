@@ -1,5 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
-import { createAddictionService } from "../services/addiction.services";
+import {
+  createAddictionService,
+  fetchAllAddictionsService,
+} from "../services/addiction.services";
 import { StatusCodes } from "http-status-codes";
 
 export async function createAddictionController(
@@ -9,12 +12,29 @@ export async function createAddictionController(
 ) {
   const { name, userId, partnerId } = req.body;
   try {
-    const newAddiction = await createAddictionService(
-      name,
-      userId,
-      partnerId,
-    );
-    res.status(StatusCodes.CREATED).send({ message:"Addiction created successfully", data: newAddiction});
+    const newAddiction = await createAddictionService(name, userId, partnerId);
+    res
+      .status(StatusCodes.CREATED)
+      .send({ message: "Addiction created successfully", data: newAddiction });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function fetchAddictionsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user!.userId;
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+
+  try {
+    const addictions = await fetchAllAddictionsService(userId, page, limit);
+    res
+      .status(StatusCodes.ACCEPTED)
+      .send({ message: "Addictions fetched successfully", data: addictions });
   } catch (err) {
     next(err);
   }
