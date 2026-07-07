@@ -28,7 +28,7 @@ export async function loginController(
   try {
     const user = await loginService(email, password);
     const token = generateToken(user.id, user.username);
-    res.status(StatusCodes.OK).send({message: "User signed up successfully", data: {user, token}});
+    res.status(StatusCodes.OK).send({message: "User logged in successfully", data: {user, token}});
   } catch (err) {
     next(err);
   }
