@@ -72,6 +72,19 @@ export async function fetchAllAddictionsService(
   return addictions;
 }
 
+export async function updateAddictionService(
+  addictionId: number,
+  addictionName: string,
+  userId: number,
+) {
+  await db
+    .update(t.addictions)
+    .set({ name: addictionName })
+    .where(
+      and(eq(t.addictions.id, addictionId), eq(t.addictions.userId, userId)),
+    );
+}
+
 export async function deleteAddictionService(
   addictionId: number,
   userId: number,

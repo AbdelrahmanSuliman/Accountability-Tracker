@@ -15,3 +15,6 @@ export const CreateAddictionSchema = z.object({
     .nonoptional("Partner ID must be provided"),
 });
 
+export const UpdateAddictionSchema = z.object({
+  name: z.string("Name must be a string").nonempty().max(maxLength),
+});
