@@ -1,5 +1,6 @@
 import * as t from "drizzle-orm/pg-core";
 import { defineRelations } from "drizzle-orm";
+import { primaryKey } from "drizzle-orm/singlestore-core";
 
 const timestamps = {
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
@@ -10,19 +11,31 @@ const timestamps = {
 export const users = t.pgTable("users", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
   email: t.varchar({ length: 255 }).notNull().unique(),
-  username: t.varchar({ length: 255}).notNull(),
+  username: t.varchar({ length: 255 }).notNull(),
   passwordHash: t.varchar("password_hash", { length: 255 }).notNull(),
   isOnboarded: t.boolean("is_onboarded").default(false),
   ...timestamps,
 });
 
-export const addictions = t.pgTable("addictions", {
-  id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: t.varchar({ length: 255 }).notNull(),
-  userId: t.integer("user_id").references(() => users.id),
-  partnerId: t.integer("partner_id").references(() => users.id),
-  ...timestamps,
-});
+export const addictions = t.pgTable(
+  "addictions",
+  {
+    id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+    name: t.varchar({ length: 255 }).notNull(),
+    userId: t
+      .integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    partnerId: t
+      .integer("partner_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => {
+    t.unique("user_partner_idx").on(table.userId, table.partnerId);
+  },
+);
 
 export const journalEntries = t.pgTable("journal_entries", {
   id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -33,32 +46,35 @@ export const journalEntries = t.pgTable("journal_entries", {
   ...timestamps,
 });
 
-export const relations = defineRelations({ users, addictions, journalEntries }, (r) => ({
-  addictions: {
-    user: r.one.users({
-      from: r.addictions.userId,
-      to: r.users.id,
-      alias: "user_addictions"
-    }),
-    partner: r.one.users({
-      from: r.addictions.partnerId,
-      to: r.users.id,
-      alias: "partner_addictions"
-    }),
-    journalEntries: r.many.journalEntries()
-  },
-  journalEntries: {
-    addiction: r.one.addictions({
-      from: r.journalEntries.addictionId,
-      to: r.addictions.id
-    })
-  },
-  users: {
-    myAddictions: r.many.addictions({
-      alias: "user_addictions"
-    }),
-    partneredAddictions: r.many.addictions({
-      alias: "partner_addictions"
-    })
-  }
-}));
+export const relations = defineRelations(
+  { users, addictions, journalEntries },
+  (r) => ({
+    addictions: {
+      user: r.one.users({
+        from: r.addictions.userId,
+        to: r.users.id,
+        alias: "user_addictions",
+      }),
+      partner: r.one.users({
+        from: r.addictions.partnerId,
+        to: r.users.id,
+        alias: "partner_addictions",
+      }),
+      journalEntries: r.many.journalEntries(),
+    },
+    journalEntries: {
+      addiction: r.one.addictions({
+        from: r.journalEntries.addictionId,
+        to: r.addictions.id,
+      }),
+    },
+    users: {
+      myAddictions: r.many.addictions({
+        alias: "user_addictions",
+      }),
+      partneredAddictions: r.many.addictions({
+        alias: "partner_addictions",
+      }),
+    },
+  }),
+);

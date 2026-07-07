@@ -5,12 +5,9 @@ import type { Request, Response, NextFunction } from "express";
 import config from "../config";
 import logger from "../util/logger";
 
-export interface AuthenticatedRequest extends Request {
-  user?: UserPayload;
-}
 
 export default function verifyToken(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {

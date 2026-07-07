@@ -32,3 +32,15 @@ export class ValidationError extends AppError {
     return {message: this.message, errors: this.errorMessages}
   }
 }
+
+export class NotFoundError extends AppError {
+  constructor(message: string) {
+    super(message, StatusCodes.NOT_FOUND);
+  }
+}
+
+export class ConflictError extends AppError {
+  constructor(message: string) {
+    super(message, StatusCodes.CONFLICT)
+  }
+}
