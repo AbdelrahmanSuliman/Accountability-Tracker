@@ -71,3 +71,14 @@ export async function fetchAllAddictionsService(
     .offset((page - 1) * pageSize);
   return addictions;
 }
+
+export async function deleteAddictionService(
+  addictionId: number,
+  userId: number,
+) {
+  await db
+    .delete(t.addictions)
+    .where(
+      and(eq(t.addictions.id, addictionId), eq(t.addictions.userId, userId)),
+    );
+}

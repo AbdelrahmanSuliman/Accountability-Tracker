@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import {
   createAddictionService,
   fetchAllAddictionsService,
+  deleteAddictionService,
 } from "../services/addiction.services";
 import { StatusCodes } from "http-status-codes";
 
@@ -35,6 +36,24 @@ export async function fetchAddictionsController(
     res
       .status(StatusCodes.ACCEPTED)
       .send({ message: "Addictions fetched successfully", data: addictions });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteAddictionController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const addictionId = Number(req.params.id);
+  const userId = req.user!.userId;
+
+  try {
+    await deleteAddictionService(addictionId, userId);
+    res
+      .status(StatusCodes.NO_CONTENT)
+      .send({ message: "Addiction deleted successfully" });
   } catch (err) {
     next(err);
   }
