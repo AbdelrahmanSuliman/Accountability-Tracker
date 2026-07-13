@@ -1,6 +1,5 @@
 import * as t from "drizzle-orm/pg-core";
 import { defineRelations } from "drizzle-orm";
-import { primaryKey } from "drizzle-orm/singlestore-core";
 
 const timestamps = {
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
@@ -32,9 +31,10 @@ export const addictions = t.pgTable(
       .notNull(),
     ...timestamps,
   },
-  (table) => {
-    t.unique("user_partner_idx").on(table.userId, table.partnerId);
-  },
+  (table) => [
+    t.unique().on(table.userId, table.partnerId),
+    t.unique("user_partner_idx").on(table.userId, table.partnerId)
+  ]
 );
 
 export const journalEntries = t.pgTable("journal_entries", {
