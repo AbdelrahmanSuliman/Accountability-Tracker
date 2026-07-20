@@ -7,6 +7,7 @@ import logger from "./util/logger";
 import errorHandler from "./middleware/error.handler";
 import authRouter from "./routes/auth.routes";
 import addictionRouter from "./routes/addiction.routes";
+import journalRouter from "./routes/journal.routes";
 
 const app = express();
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 const router = express.Router();
 router.use("/auth", authRouter);
 router.use("/addiction", addictionRouter);
+router.use("/journal", journalRouter)
 app.use("/api/v1", router);
 
 app.use(errorHandler);
