@@ -20,7 +20,7 @@ export default function verifyToken(
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secretKey) as UserPayload;
+    const decoded = jwt.verify(token, config.jwt.secretKey) as unknown as  UserPayload;
 
     req.user = decoded;
 
