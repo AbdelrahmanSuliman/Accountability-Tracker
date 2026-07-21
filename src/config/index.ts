@@ -1,4 +1,4 @@
-import ConfigSchema from "../schema/config";
+import ConfigSchema from "../schema/config.schema";
 
 
 export const config = {
