@@ -1,0 +1,77 @@
+import { addictions } from "./../db/schema";
+import { StatusCodes } from "http-status-codes";
+import {
+  addJournalEntryService,
+  updateJournalEntryService,
+  getAllJournalEntriesService,
+} from "../services/journal.services";
+import type { NextFunction, Request, Response } from "express";
+
+//TODO: finish rest of controllers and create appropiate schema validation and test the endpoints
+export async function addJournalEntryController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user!.userId;
+  const { addictionId, succeeded, content, targetDate } = req.body;
+  try {
+    const newEntry = await addJournalEntryService(
+      userId,
+      addictionId,
+      succeeded,
+      content,
+      targetDate,
+    );
+    res
+      .status(StatusCodes.CREATED)
+      .send({ message: "Entry created successfully", data: newEntry });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateJournalEntryController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user!.userId;
+  const entryId = Number(req.params.entryId);
+  const { addictionId, succeeded, content, targetDate } = req.body;
+  try {
+    await updateJournalEntryService(
+      userId,
+      entryId,
+      addictionId,
+      succeeded,
+      content,
+      targetDate,
+    );
+    res
+      .status(StatusCodes.OK)
+      .send({ message: "Journal updated successfully" });
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function getAllJournalEntriesController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user!.userId;
+  const addictionId = Number(req.params.addictions);
+  try {
+    const journalEntries = await getAllJournalEntriesService(
+      userId,
+      addictionId,
+    );
+    res
+      .status(StatusCodes.OK)
+      .send({ message: "Journals fetched successfully", data: journalEntries });
+  } catch (err) {
+    throw err;
+  }
+}
