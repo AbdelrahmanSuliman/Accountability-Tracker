@@ -4,6 +4,7 @@ import {
   addJournalEntryService,
   updateJournalEntryService,
   getAllJournalEntriesService,
+  deleteJournalEntryService,
 } from "../services/journal.services";
 import type { NextFunction, Request, Response } from "express";
 
@@ -73,5 +74,24 @@ export async function getAllJournalEntriesController(
       .send({ message: "Journals fetched successfully", data: journalEntries });
   } catch (err) {
     throw err;
+  }
+}
+
+export async function deleteJournalEntryController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const userId = req.user!.userId;
+  const addictionId = Number(req.params.addictionId);
+  const entryId = Number(req.params.entryId);
+
+  try {
+    await deleteJournalEntryService(userId, entryId, addictionId);
+    res
+      .status(StatusCodes.NO_CONTENT)
+      .send({ message: "Journal deleted successfully" });
+  } catch (err) {
+    next(err);
   }
 }
