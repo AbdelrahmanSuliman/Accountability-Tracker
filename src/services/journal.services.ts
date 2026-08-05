@@ -1,6 +1,6 @@
 import db from "../db/index";
 import * as t from "../db/schema";
-import { eq, lt, gte, ne, and, asc } from "drizzle-orm";
+import { eq, lt, gte, ne, and, asc, exists } from "drizzle-orm";
 import { AppError, ConflictError, NotFoundError } from "../util/error";
 
 export async function addJournalEntryService(
@@ -117,26 +117,30 @@ export async function updateJournalEntryService(
   }
 }
 
-export async function deleteJournalEntryService(userId: number, entryId: number, addictionId: number) {
+export async function deleteJournalEntryService(
+  userId: number,
+  entryId: number,
+  addictionId: number,
+) {
   try {
-    const [authorizedAddiction] = await db
-      .select()
-      .from(t.addictions)
-      .where(
-        and(eq(t.addictions.id, addictionId), eq(t.addictions.userId, userId)),
-      )
-      .limit(1);
-
-    
-    
-    if (!authorizedAddiction) {
-      throw new NotFoundError("Addiction record not found or access denied");
-    }
-
-
-    await db.delete(t.journalEntries).where(eq(t.journalEntries.id, entryId))
-    
+    await db.delete(t.journalEntries).where(
+      and(
+        eq(t.journalEntries.id, entryId),
+        eq(t.journalEntries.addictionId, addictionId),
+        exists(
+          db
+            .select()
+            .from(t.addictions)
+            .where(
+              and(
+                eq(t.addictions.id, addictionId),
+                eq(t.addictions.userId, userId),
+              ),
+            ),
+        ),
+      ),
+    );
   } catch (err) {
-    throw err
+    throw err;
   }
 }
