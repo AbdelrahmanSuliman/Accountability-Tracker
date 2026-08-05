@@ -1,6 +1,15 @@
 import * as t from "drizzle-orm/pg-core";
 import { defineRelations } from "drizzle-orm";
-import { primaryKey } from "drizzle-orm/singlestore-core";
+
+//TODO: add defaults when neccesary and make sure important fields are non-nullable
+//add ondelete: cascade where applicable
+//create a invitation table that links the user with their partner
+
+export const invitationStatusEnum = t.pgEnum("status", [
+  "accepted",
+  "pending",
+  "rejected",
+]);
 
 const timestamps = {
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
@@ -17,6 +26,20 @@ export const users = t.pgTable("users", {
   ...timestamps,
 });
 
+export const invitations = t.pgTable("invitations", {
+  id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+  senderId: t
+    .integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  receiverId: t
+    .integer("partner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: invitationStatusEnum(),
+  ...timestamps,
+});
+
 export const addictions = t.pgTable(
   "addictions",
   {
@@ -28,13 +51,12 @@ export const addictions = t.pgTable(
       .notNull(),
     partnerId: t
       .integer("partner_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
+      .references(() => users.id, { onDelete: "cascade" }),
     ...timestamps,
   },
-  (table) => {
-    t.unique("user_partner_idx").on(table.userId, table.partnerId);
-  },
+  (table) => [
+    t.unique("user_partner_idx").on(table.userId, table.partnerId),
+  ],
 );
 
 export const journalEntries = t.pgTable("journal_entries", {
@@ -47,7 +69,7 @@ export const journalEntries = t.pgTable("journal_entries", {
 });
 
 export const relations = defineRelations(
-  { users, addictions, journalEntries },
+  { users, addictions, journalEntries, invitations },
   (r) => ({
     addictions: {
       user: r.one.users({
@@ -62,6 +84,19 @@ export const relations = defineRelations(
       }),
       journalEntries: r.many.journalEntries(),
     },
+    invitations: {
+      sender: r.one.users({
+        from: r.invitations.senderId,
+        to: r.users.id,
+        alias: "sent_invitations",
+      }),
+
+      receiver: r.one.users({
+        from: r.invitations.receiverId,
+        to: r.users.id,
+        alias: "received_invitations",
+      }),
+    },
     journalEntries: {
       addiction: r.one.addictions({
         from: r.journalEntries.addictionId,
@@ -72,8 +107,14 @@ export const relations = defineRelations(
       myAddictions: r.many.addictions({
         alias: "user_addictions",
       }),
-      partneredAddictions: r.many.addictions({
+      accountabilityPartnerFor: r.many.addictions({
         alias: "partner_addictions",
+      }),
+      sentInvitations: r.many.invitations({
+        alias: "sent_invitations",
+      }),
+      receivedInvitations: r.many.invitations({
+        alias: "received_invitations",
       }),
     },
   }),
