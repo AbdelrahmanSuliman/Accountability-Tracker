@@ -36,6 +36,10 @@ export const invitations = t.pgTable("invitations", {
     .integer("partner_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  addictionId: t
+    .integer("addiction_id")
+    .notNull()
+    .references(() => addictions.id, { onDelete: "cascade" }),
   status: invitationStatusEnum(),
   ...timestamps,
 });
@@ -54,9 +58,7 @@ export const addictions = t.pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     ...timestamps,
   },
-  (table) => [
-    t.unique("user_partner_idx").on(table.userId, table.partnerId),
-  ],
+  (table) => [t.unique("user_partner_idx").on(table.userId, table.partnerId)],
 );
 
 export const journalEntries = t.pgTable("journal_entries", {
