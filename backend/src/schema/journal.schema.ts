@@ -5,7 +5,7 @@ const maxLength = 1000;
 export const addJournalEntrySchema = z.object({
   content: z.string("Content must be a valid string").max(maxLength),
   succeeded: z.boolean("Succeeded must be a boolean"),
-  targetDate: z.date("Target date must"),
+  targetDate: z.date("Target date must be valid"),
 });
 
 export const updateJournalEntrySchema = z.object({
@@ -17,5 +17,5 @@ export const updateJournalEntrySchema = z.object({
     .gte(0, "addiction ID must be a valid ID"),
   content: z.string("Content must be a valid string").max(maxLength),
   succeeded: z.boolean("Succeeded must be a boolean"),
-  targetDate: z.date("Target date must"),
+  targetDate: z.date("Target date must be valid"),
 });
