@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
-export type FieldErrors = Record<string, string[]>
+export type FieldErrors = Record<string, string[]>;
 
 export class AppError extends Error {
   statusCode: number;
@@ -29,7 +29,7 @@ export class ValidationError extends AppError {
   }
 
   public override serialize() {
-    return {message: this.message, errors: this.errorMessages}
+    return { message: this.message, errors: this.errorMessages };
   }
 }
 
@@ -41,6 +41,12 @@ export class NotFoundError extends AppError {
 
 export class ConflictError extends AppError {
   constructor(message: string) {
-    super(message, StatusCodes.CONFLICT)
+    super(message, StatusCodes.CONFLICT);
+  }
+}
+
+export class ForbiddenError extends AppError {
+  constructor(message: string) {
+    super(message, StatusCodes.FORBIDDEN);
   }
 }
