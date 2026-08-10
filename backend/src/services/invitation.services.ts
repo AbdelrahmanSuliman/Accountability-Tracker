@@ -1,9 +1,9 @@
 import { and, eq, asc } from "drizzle-orm";
 import db from "../db/index";
 import * as t from "../db/schema";
-import { ConflictError, NotFoundError } from "../util/error";
+import { ConflictError, ForbiddenError, NotFoundError } from "../util/error";
 
-type InvitationStatusEnum = "accepted" | "pending" | "rejected";
+export type InvitationStatusEnum = "accepted" | "pending" | "rejected";
 
 export async function fetchInvitationsService(
   userId: number,
@@ -65,42 +65,34 @@ export async function createInvitationService(
 }
 
 export async function acceptInvitationService(
-  senderId: number,
-  receiverId: number,
-  addictionId: number,
+  currentUserId: number,
+  invitationId: number,
 ) {
   try {
-    const [existingInvitation] = await db
+    const [invitation] = await db
       .select()
       .from(t.invitations)
-      .where(
-        and(
-          eq(t.invitations.senderId, senderId),
-          eq(t.invitations.receiverId, receiverId),
-        ),
-      );
+      .where(eq(t.invitations.id, invitationId));
 
-    if (!existingInvitation) {
-      throw new NotFoundError("Invitation not found.");
-    }
+    
+    if (!invitation)
+      throw new NotFoundError("Invitation does not exist.")
 
-    if (existingInvitation.status !== "pending") {
-      throw new ConflictError(
-        `Cannot accept invitation with status '${existingInvitation.status}'.`,
-      );
-    }
+    if (invitation.receiverId !== currentUserId)
+      throw new ForbiddenError("You are not authorized to accept this invitation.")
 
+    if (invitation.status !== "pending")
+      throw new ConflictError(`Cannot accept invitation with status ${invitation.status}.`)
     await db.transaction(async (tx) => {
-      await db
+      await tx
         .update(t.invitations)
         .set({ status: "accepted" })
-        .where(eq(t.invitations.id, existingInvitation.id));
-      await db
+        .where(eq(t.invitations.id, invitation.id));
+      await tx
         .update(t.addictions)
-        .set({ partnerId: receiverId })
-        .where(eq(t.addictions.id, addictionId));
+        .set({ partnerId: currentUserId })
+        .where(eq(t.addictions.id, currentUserId));
     });
-    
   } catch (err) {
     throw err;
   }
