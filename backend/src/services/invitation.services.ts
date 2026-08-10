@@ -88,17 +88,19 @@ export async function acceptInvitationService(
       throw new ConflictError(
         `Cannot accept invitation with status '${existingInvitation.status}'.`,
       );
-      }
-      //TODO: rewrite these 2 db calls in one transaction
-    await db
-      .update(t.invitations)
-      .set({ status: "accepted" })
-      .where(eq(t.invitations.id, existingInvitation.id));
+    }
 
-    await db
-      .update(t.addictions)
-      .set({ partnerId: receiverId })
-      .where(eq(t.addictions.id, addictionId));
+    await db.transaction(async (tx) => {
+      await db
+        .update(t.invitations)
+        .set({ status: "accepted" })
+        .where(eq(t.invitations.id, existingInvitation.id));
+      await db
+        .update(t.addictions)
+        .set({ partnerId: receiverId })
+        .where(eq(t.addictions.id, addictionId));
+    });
+    
   } catch (err) {
     throw err;
   }
@@ -117,8 +119,8 @@ export async function deleteInvitationService(
           eq(t.invitations.senderId, senderId),
         ),
       )
-          .returning();
-      
+      .returning();
+
     if (!deleted) {
       throw new NotFoundError(
         "Invitation not found or unauthorized to delete.",
