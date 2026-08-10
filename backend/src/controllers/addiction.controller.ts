@@ -12,7 +12,8 @@ export async function createAddictionController(
   res: Response,
   next: NextFunction,
 ) {
-  const { name, userId, partnerId } = req.body;
+  const userId = req.user!.userId;
+  const { name, partnerId } = req.body;
   try {
     const newAddiction = await createAddictionService(name, userId, partnerId);
     res
