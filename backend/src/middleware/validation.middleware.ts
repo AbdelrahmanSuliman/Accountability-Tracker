@@ -4,14 +4,22 @@ import { z, ZodError } from "zod";
 import { ValidationError, type FieldErrors } from "../util/error";
 import logger from "../util/logger";
 
-export function validateData(schema: z.ZodObject<any, any>) {
+interface RequestSchemas {
+  body?: z.ZodObject<any, any>;
+  params?: z.ZodObject<any, any>;
+  query?: z.ZodObject<any, any>;
+}
+
+export function validateData(schemas: RequestSchemas) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body);
+      if (schemas.body) schemas.body.parse(req.body);
+      if (schemas.params) schemas.params.parse(req.params);
+      if (schemas.query) schemas.query.parse(req.query);
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        const errorMessages: FieldErrors = z.flattenError(err).fieldErrors
+        const errorMessages: FieldErrors = z.flattenError(err).fieldErrors;
         next(new ValidationError(errorMessages));
       } else {
         next(err);
