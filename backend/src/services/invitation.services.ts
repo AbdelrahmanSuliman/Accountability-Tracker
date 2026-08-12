@@ -2,11 +2,13 @@ import { and, eq, asc } from "drizzle-orm";
 import db from "../db/index";
 import * as t from "../db/schema";
 import { ConflictError, ForbiddenError, NotFoundError } from "../util/error";
+import logger from "../util/logger";
 
 export type InvitationStatusEnum = "accepted" | "pending" | "rejected";
 
-export async function fetchInvitationsService(
-  userId: number,
+//TODO: make a function to get invitations that you received
+export async function fetchSentInvitationsService(
+  userId: string,
   status: InvitationStatusEnum,
   page: number = 1,
   pageSize: number = 10,
@@ -30,9 +32,9 @@ export async function fetchInvitationsService(
 }
 
 export async function createInvitationService(
-  senderId: number,
-  receiverId: number,
-  addictionId: number,
+  senderId: string,
+  receiverId: string,
+  addictionId: string,
 ) {
   try {
     const [existingInvitation] = await db
@@ -58,15 +60,17 @@ export async function createInvitationService(
         addictionId,
       })
       .returning();
+    logger.info(newInvitation)
     return newInvitation;
   } catch (err) {
     throw err;
   }
 }
 
+//TODO: refactor so the accepting is a link that has the invitations UUID in the url
 export async function acceptInvitationService(
-  currentUserId: number,
-  invitationId: number,
+  currentUserId: string,
+  invitationId: string,
 ) {
   try {
     const [invitation] = await db
@@ -99,8 +103,8 @@ export async function acceptInvitationService(
 }
 
 export async function deleteInvitationService(
-  senderId: number,
-  invitationId: number,
+  senderId: string,
+  invitationId: string,
 ) {
   try {
     const [deleted] = await db

@@ -4,8 +4,8 @@ import { eq, lt, gte, ne, and, asc, exists } from "drizzle-orm";
 import { AppError, ConflictError, NotFoundError } from "../util/error";
 
 export async function addJournalEntryService(
-  userId: number,
-  addictionId: number,
+  userId: string,
+  addictionId: string,
   succeeded: boolean,
   content: string,
   targetDate: string,
@@ -50,8 +50,8 @@ export async function addJournalEntryService(
 }
 
 export async function getAllJournalEntriesService(
-  userId: number,
-  addictionId: number,
+  userId: string,
+  addictionId: string,
   page: number = 1,
   pageNumber: number = 10,
 ) {
@@ -75,9 +75,9 @@ export async function getAllJournalEntriesService(
 }
 
 export async function updateJournalEntryService(
-  userId: number,
-  entryId: number,
-  addictionId: number,
+  userId: string,
+  entryId: string,
+  addictionId: string,
   succeeded: boolean,
   content: string,
   targetDate: string,
@@ -118,9 +118,9 @@ export async function updateJournalEntryService(
 }
 
 export async function deleteJournalEntryService(
-  userId: number,
-  entryId: number,
-  addictionId: number,
+  userId: string,
+  entryId: string,
+  addictionId: string,
 ) {
   try {
     await db.delete(t.journalEntries).where(

@@ -1,10 +1,6 @@
 import * as t from "drizzle-orm/pg-core";
 import { defineRelations } from "drizzle-orm";
 
-//TODO: add defaults when neccesary and make sure important fields are non-nullable
-//add ondelete: cascade where applicable
-//create a invitation table that links the user with their partner
-
 export const invitationStatusEnum = t.pgEnum("status", [
   "accepted",
   "pending",
@@ -17,8 +13,10 @@ const timestamps = {
   deletedAt: t.timestamp("deleted_at"),
 };
 
+//TODO: migrate all ID's to UUID's and ensure using string types in controllers and anywhere that requires ID
+
 export const users = t.pgTable("users", {
-  id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: t.uuid("id").primaryKey().defaultRandom(),
   email: t.varchar({ length: 255 }).notNull().unique(),
   username: t.varchar({ length: 255 }).notNull(),
   passwordHash: t.varchar("password_hash", { length: 255 }).notNull(),
@@ -27,34 +25,34 @@ export const users = t.pgTable("users", {
 });
 
 export const invitations = t.pgTable("invitations", {
-  id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: t.uuid("id").primaryKey().defaultRandom(),
   senderId: t
-    .integer("user_id")
+    .uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   receiverId: t
-    .integer("partner_id")
+    .uuid("partner_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   addictionId: t
-    .integer("addiction_id")
+    .uuid("addiction_id")
     .notNull()
     .references(() => addictions.id, { onDelete: "cascade" }),
-  status: invitationStatusEnum(),
+  status: invitationStatusEnum().default("pending"),
   ...timestamps,
 });
 
 export const addictions = t.pgTable(
   "addictions",
   {
-    id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+    id: t.uuid("id").primaryKey().defaultRandom(),
     name: t.varchar({ length: 255 }).notNull(),
     userId: t
-      .integer("user_id")
+      .uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     partnerId: t
-      .integer("partner_id")
+      .uuid("partner_id")
       .references(() => users.id, { onDelete: "cascade" }),
     ...timestamps,
   },
@@ -62,11 +60,11 @@ export const addictions = t.pgTable(
 );
 
 export const journalEntries = t.pgTable("journal_entries", {
-  id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: t.uuid("id").primaryKey().defaultRandom(),
   content: t.text(),
   succeeded: t.boolean(),
   date: t.date(),
-  addictionId: t.integer("addiction_id").references(() => addictions.id),
+  addictionId: t.uuid("addiction_id").references(() => addictions.id),
   ...timestamps,
 });
 

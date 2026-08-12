@@ -2,20 +2,17 @@ import * as z from "zod";
 
 const maxLength = 1000;
 
-export const addJournalEntrySchema = z.object({
+export const AddJournalEntrySchema = z.object({
   content: z.string("Content must be a valid string").max(maxLength),
   succeeded: z.boolean("Succeeded must be a boolean"),
-  targetDate: z.date("Target date must be valid"),
+  targetDate: z.coerce.date("Target date must be valid"),
 });
 
-export const updateJournalEntrySchema = z.object({
-  entryId: z
-    .number("Entry ID must be a number")
-    .gte(0, "Entry ID must be a valid ID"),
+export const UpdateJournalEntrySchema = z.object({
   addictionId: z
-    .number("Addiction ID must be a number")
-    .gte(0, "addiction ID must be a valid ID"),
+    .uuid("Addiction ID must be valid")
+    .nonoptional("Addiction ID must be provided"),
   content: z.string("Content must be a valid string").max(maxLength),
   succeeded: z.boolean("Succeeded must be a boolean"),
-  targetDate: z.date("Target date must be valid"),
+  targetDate: z.coerce.date("Target date must be valid"),
 });

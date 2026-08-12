@@ -6,11 +6,8 @@ import { StatusCodes } from "http-status-codes";
 
 export async function createAddictionService(
   name: string,
-  userId: number,
-  partnerId: number,
+  userId: string,
 ) {
-  if (userId === partnerId)
-    throw new ConflictError("User and partner cannot have the same ID");
   try {
     const [newAddiction] = await db
       .insert(t.addictions)
@@ -28,7 +25,7 @@ export async function createAddictionService(
 }
 
 export async function fetchAllAddictionsService(
-  userId: number,
+  userId: string,
   page: number = 1,
   pageSize: number = 10,
 ) {
@@ -43,9 +40,9 @@ export async function fetchAllAddictionsService(
 }
 
 export async function updateAddictionService(
-  addictionId: number,
+  addictionId: string,
   addictionName: string,
-  userId: number,
+  userId: string,
 ) {
   await db
     .update(t.addictions)
@@ -56,8 +53,8 @@ export async function updateAddictionService(
 }
 
 export async function deleteAddictionService(
-  addictionId: number,
-  userId: number,
+  addictionId: string,
+  userId: string,
 ) {
   await db
     .delete(t.addictions)

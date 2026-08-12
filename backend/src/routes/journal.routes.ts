@@ -1,16 +1,47 @@
 import express from "express";
 import verifyToken from "../middleware/verifyToken.middleware";
-import { addJournalEntryController, deleteJournalEntryController, getAllJournalEntriesController, updateJournalEntryController } from "../controllers/journal.controller";
+import {
+  addJournalEntryController,
+  deleteJournalEntryController,
+  getAllJournalEntriesController,
+  updateJournalEntryController,
+} from "../controllers/journal.controller";
 import { validateData } from "../middleware/validation.middleware";
-import { addJournalEntrySchema, updateJournalEntrySchema } from "../schema/journal.schema";
+import {
+  AddJournalEntrySchema,
+  UpdateJournalEntrySchema,
+} from "../schema/journal.schema";
+import {
+  AddictionAndEntryIdParamsSchema,
+  AddictionIdParamSchema,
+  EntryIdParamsSchema,
+} from "../schema/validation.schema";
 
+const journalRouter = express.Router();
 
-const journalRouter = express.Router()
+journalRouter.post(
+  "/",
+  verifyToken,
+  validateData({ body: AddJournalEntrySchema }),
+  addJournalEntryController,
+);
+journalRouter.patch(
+  "/:entryId",
+  verifyToken,
+  validateData({ body: UpdateJournalEntrySchema, params: EntryIdParamsSchema }),
+  updateJournalEntryController,
+);
+journalRouter.get(
+  "/:addictionId",
+  verifyToken,
+  validateData({ params: AddictionIdParamSchema }),
+  getAllJournalEntriesController,
+);
+journalRouter.delete(
+  "/addictions/:addictionId/entries/:entryId",
+  verifyToken,
+  validateData({ params: AddictionAndEntryIdParamsSchema }),
+  deleteJournalEntryController,
+);
 
-
-journalRouter.post("/", validateData(addJournalEntrySchema), verifyToken, addJournalEntryController)
-journalRouter.patch("/:entryId", validateData(updateJournalEntrySchema), verifyToken, updateJournalEntryController)
-journalRouter.get("/:addictionId", verifyToken, getAllJournalEntriesController)
-journalRouter.delete("/addictions/:addictionId/entries/:entryId", verifyToken, deleteJournalEntryController)
-
-export default journalRouter
+export default journalRouter;

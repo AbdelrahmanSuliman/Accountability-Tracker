@@ -7,15 +7,17 @@ import {
 } from "../services/addiction.services";
 import { StatusCodes } from "http-status-codes";
 
+//TODO: refactor such that the user can just create an addiction and the partner ID isnt provided
+//make sure to change the zod schema as well :>
 export async function createAddictionController(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   const userId = req.user!.userId;
-  const { name, partnerId } = req.body;
+  const { name } = req.body;
   try {
-    const newAddiction = await createAddictionService(name, userId, partnerId);
+    const newAddiction = await createAddictionService(name, userId);
     res
       .status(StatusCodes.CREATED)
       .send({ message: "Addiction created successfully", data: newAddiction });
@@ -36,7 +38,7 @@ export async function fetchAddictionsController(
   try {
     const addictions = await fetchAllAddictionsService(userId, page, limit);
     res
-      .status(StatusCodes.ACCEPTED)
+      .status(StatusCodes.OK)
       .send({ message: "Addictions fetched successfully", data: addictions });
   } catch (err) {
     next(err);
@@ -44,17 +46,17 @@ export async function fetchAddictionsController(
 }
 
 export async function deleteAddictionController(
-  req: Request,
+  req: Request<{ addictionId: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  const addictionId = Number(req.params.id);
+  const addictionId = req.params.addictionId;
   const userId = req.user!.userId;
 
   try {
     await deleteAddictionService(addictionId, userId);
     res
-      .status(StatusCodes.NO_CONTENT)
+      .status(StatusCodes.OK)
       .send({ message: "Addiction deleted successfully" });
   } catch (err) {
     next(err);
@@ -62,18 +64,18 @@ export async function deleteAddictionController(
 }
 
 export async function updateAddictionController(
-  req: Request,
+  req: Request<{ addictionId: string }>,
   res: Response,
   next: NextFunction,
 ) {
-  const addictionId = Number(req.params.id);
+  const addictionId = req.params.addictionId;
   const userId = req.user!.userId;
   const { addictionName } = req.body;
   try {
     await updateAddictionService(addictionId, addictionName, userId);
 
     res
-      .status(StatusCodes.NO_CONTENT)
+      .status(StatusCodes.OK)
       .send({ message: "Addiction updated successfully" });
   } catch (err) {
     next(err);

@@ -3,7 +3,7 @@ import * as z from "zod";
 const minLength = 6;
 const maxLength = 255;
 
-export const userLoginSchema = z.object({
+export const UserLoginSchema = z.object({
   email: z
     .email()
     .nonempty("Email is required")
@@ -16,7 +16,7 @@ export const userLoginSchema = z.object({
     .max(maxLength),
 });
 
-export const userSignupSchema = z.object({
+export const UserSignupSchema = z.object({
   username: z
     .string()
     .nonempty("Username is required")
