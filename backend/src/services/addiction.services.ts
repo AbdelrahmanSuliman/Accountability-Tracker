@@ -3,48 +3,15 @@ import db from "../db/index";
 import * as t from "../db/schema";
 import { AppError, ConflictError, NotFoundError } from "../util/error";
 import { StatusCodes } from "http-status-codes";
-import logger from "../util/logger";
 
 export async function createAddictionService(
   name: string,
-  userId: number,
-  partnerId: number,
+  userId: string,
 ) {
-  if (userId === partnerId)
-    throw new ConflictError("User and partner cannot have the same ID");
   try {
-    const [existingRelationship] = await db
-      .select()
-      .from(t.addictions)
-      .where(
-        and(
-          eq(t.addictions.userId, userId),
-          eq(t.addictions.partnerId, partnerId),
-        ),
-      )
-      .limit(1);
-    if (existingRelationship)
-      throw new ConflictError("This addiction relationship already exists");
-    const user = await db.query.users.findFirst({
-      where: {
-        id: userId,
-      },
-    });
-    const partner = await db.query.users.findFirst({
-      where: {
-        id: partnerId,
-      },
-    });
-
-    if (!user || !partner) {
-      throw new NotFoundError(
-        `User with id ${userId} and/or partner with id ${partnerId} does not exist`,
-      );
-    }
-
     const [newAddiction] = await db
       .insert(t.addictions)
-      .values({ name, userId, partnerId })
+      .values({ name, userId })
       .returning();
     if (!newAddiction)
       throw new AppError(
@@ -58,7 +25,7 @@ export async function createAddictionService(
 }
 
 export async function fetchAllAddictionsService(
-  userId: number,
+  userId: string,
   page: number = 1,
   pageSize: number = 10,
 ) {
@@ -73,9 +40,9 @@ export async function fetchAllAddictionsService(
 }
 
 export async function updateAddictionService(
-  addictionId: number,
+  addictionId: string,
   addictionName: string,
-  userId: number,
+  userId: string,
 ) {
   await db
     .update(t.addictions)
@@ -86,8 +53,8 @@ export async function updateAddictionService(
 }
 
 export async function deleteAddictionService(
-  addictionId: number,
-  userId: number,
+  addictionId: string,
+  userId: string,
 ) {
   await db
     .delete(t.addictions)

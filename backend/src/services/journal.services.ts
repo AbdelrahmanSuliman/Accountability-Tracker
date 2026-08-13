@@ -1,11 +1,12 @@
+import { journalEntries } from "./../db/schema";
 import db from "../db/index";
 import * as t from "../db/schema";
 import { eq, lt, gte, ne, and, asc, exists } from "drizzle-orm";
 import { AppError, ConflictError, NotFoundError } from "../util/error";
 
 export async function addJournalEntryService(
-  userId: number,
-  addictionId: number,
+  userId: string,
+  addictionId: string,
   succeeded: boolean,
   content: string,
   targetDate: string,
@@ -50,15 +51,29 @@ export async function addJournalEntryService(
 }
 
 export async function getAllJournalEntriesService(
-  userId: number,
-  addictionId: number,
+  userId: string,
+  addictionId: string,
   page: number = 1,
-  pageNumber: number = 10,
+  limit: number = 10,
 ) {
   try {
+    const offset = (page - 1) * limit;
+
     const journalEntries = await db
-      .select()
+      .select({
+        id: t.journalEntries.id,
+        content: t.journalEntries.content,
+        succeeded: t.journalEntries.succeeded,
+        date: t.journalEntries.date,
+        addictionId: t.journalEntries.addictionId,
+        createdAt: t.journalEntries.createdAt,
+        updatedAt: t.journalEntries.updatedAt,
+      })
       .from(t.journalEntries)
+      .innerJoin(
+        t.addictions,
+        eq(t.journalEntries.addictionId, t.addictions.id),
+      )
       .where(
         and(
           eq(t.journalEntries.addictionId, addictionId),
@@ -66,18 +81,20 @@ export async function getAllJournalEntriesService(
         ),
       )
       .orderBy(asc(t.journalEntries.date))
-      .limit(page)
-      .offset(pageNumber);
+      .limit(limit)
+      .offset(offset);
+
     return journalEntries;
   } catch (err) {
     throw err;
   }
 }
 
+
 export async function updateJournalEntryService(
-  userId: number,
-  entryId: number,
-  addictionId: number,
+  userId: string,
+  entryId: string,
+  addictionId: string,
   succeeded: boolean,
   content: string,
   targetDate: string,
@@ -95,32 +112,31 @@ export async function updateJournalEntryService(
       throw new NotFoundError("Addiction record not found or access denied");
     }
 
-    const [entryExistsThatDate] = await db
-      .select()
-      .from(t.journalEntries)
+    const result = await db
+      .update(t.journalEntries)
+      .set({ content, succeeded, date: targetDate })
       .where(
         and(
-          eq(t.journalEntries.date, targetDate),
+          eq(t.journalEntries.id, entryId),
           eq(t.journalEntries.addictionId, addictionId),
         ),
-      );
+      )
+      .returning();
 
-    if (!entryExistsThatDate)
-      throw new NotFoundError("Entry you are trying to update does not exist");
+    if (result.length === 0) {
+      throw new NotFoundError("Journal entry not found");
+    }
 
-    await db
-      .update(t.journalEntries)
-      .set({ content, succeeded })
-      .where(eq(t.journalEntries.id, entryId));
+    return result[0];
   } catch (err) {
     throw err;
   }
 }
 
 export async function deleteJournalEntryService(
-  userId: number,
-  entryId: number,
-  addictionId: number,
+  userId: string,
+  entryId: string,
+  addictionId: string,
 ) {
   try {
     await db.delete(t.journalEntries).where(

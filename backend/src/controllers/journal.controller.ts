@@ -8,7 +8,6 @@ import {
 } from "../services/journal.services";
 import type { NextFunction, Request, Response } from "express";
 
-//TODO: finish rest of controllers and create appropiate schema validation and test the endpoints
 export async function addJournalEntryController(
   req: Request,
   res: Response,
@@ -33,12 +32,12 @@ export async function addJournalEntryController(
 }
 
 export async function updateJournalEntryController(
-  req: Request,
+  req: Request<{ entryId: string }>,
   res: Response,
   next: NextFunction,
 ) {
   const userId = req.user!.userId;
-  const entryId = Number(req.params.entryId);
+  const entryId = req.params.entryId;
   const { addictionId, succeeded, content, targetDate } = req.body;
   try {
     await updateJournalEntryService(
@@ -53,17 +52,17 @@ export async function updateJournalEntryController(
       .status(StatusCodes.OK)
       .send({ message: "Journal updated successfully" });
   } catch (err) {
-    throw err;
+    next(err);
   }
 }
 
 export async function getAllJournalEntriesController(
-  req: Request,
+  req: Request<{ addictionId: string }>,
   res: Response,
   next: NextFunction,
 ) {
   const userId = req.user!.userId;
-  const addictionId = Number(req.params.addictions);
+  const addictionId = req.params.addictionId;
   try {
     const journalEntries = await getAllJournalEntriesService(
       userId,
@@ -73,18 +72,18 @@ export async function getAllJournalEntriesController(
       .status(StatusCodes.OK)
       .send({ message: "Journals fetched successfully", data: journalEntries });
   } catch (err) {
-    throw err;
+    next(err);
   }
 }
 
 export async function deleteJournalEntryController(
-  req: Request,
+  req: Request<{ entryId: string; addictionId: string }>,
   res: Response,
   next: NextFunction,
 ) {
   const userId = req.user!.userId;
-  const addictionId = Number(req.params.addictionId);
-  const entryId = Number(req.params.entryId);
+  const addictionId = req.params.addictionId;
+  const entryId = req.params.entryId;
 
   try {
     await deleteJournalEntryService(userId, entryId, addictionId);
