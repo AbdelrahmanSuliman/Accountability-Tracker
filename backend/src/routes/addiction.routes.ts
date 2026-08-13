@@ -11,7 +11,7 @@ import {
   updateAddictionController,
 } from "../controllers/addiction.controller";
 import verifyToken from "../middleware/verifyToken.middleware";
-import { AddictionIdParamSchema, IDParamSchema } from "../schema/validation.schema";
+import { AddictionIdParamSchema, IDParamSchema } from "../schema/id.schema";
 
 const addictionRouter = express.Router();
 

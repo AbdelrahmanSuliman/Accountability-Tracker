@@ -7,8 +7,6 @@ import {
 } from "../services/addiction.services";
 import { StatusCodes } from "http-status-codes";
 
-//TODO: refactor such that the user can just create an addiction and the partner ID isnt provided
-//make sure to change the zod schema as well :>
 export async function createAddictionController(
   req: Request,
   res: Response,

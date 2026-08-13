@@ -6,7 +6,6 @@ import logger from "../util/logger";
 
 export type InvitationStatusEnum = "accepted" | "pending" | "rejected";
 
-//TODO: make a function to get invitations that you received
 export async function fetchSentInvitationsService(
   userId: string,
   status: InvitationStatusEnum,
@@ -21,6 +20,30 @@ export async function fetchSentInvitationsService(
         and(
           eq(t.invitations.status, status),
           eq(t.invitations.senderId, userId),
+        ),
+      )
+      .orderBy(asc(t.invitations.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function fetchReceivedInvitationsService(
+  userId: string,
+  status: InvitationStatusEnum,
+  page: number = 1,
+  pageSize: number = 10,
+) {
+  try {
+    return await db
+      .select()
+      .from(t.invitations)
+      .where(
+        and(
+          eq(t.invitations.status, status),
+          eq(t.invitations.receiverId, userId),
         ),
       )
       .orderBy(asc(t.invitations.createdAt))
@@ -60,14 +83,13 @@ export async function createInvitationService(
         addictionId,
       })
       .returning();
-    logger.info(newInvitation)
+    logger.info(newInvitation);
     return newInvitation;
   } catch (err) {
     throw err;
   }
 }
 
-//TODO: refactor so the accepting is a link that has the invitations UUID in the url
 export async function acceptInvitationService(
   currentUserId: string,
   invitationId: string,
@@ -78,15 +100,17 @@ export async function acceptInvitationService(
       .from(t.invitations)
       .where(eq(t.invitations.id, invitationId));
 
-    
-    if (!invitation)
-      throw new NotFoundError("Invitation does not exist.")
+    if (!invitation) throw new NotFoundError("Invitation does not exist.");
 
     if (invitation.receiverId !== currentUserId)
-      throw new ForbiddenError("You are not authorized to accept this invitation.")
+      throw new ForbiddenError(
+        "You are not authorized to accept this invitation.",
+      );
 
     if (invitation.status !== "pending")
-      throw new ConflictError(`Cannot accept invitation with status ${invitation.status}.`)
+      throw new ConflictError(
+        `Cannot accept invitation with status ${invitation.status}.`,
+      );
     await db.transaction(async (tx) => {
       await tx
         .update(t.invitations)

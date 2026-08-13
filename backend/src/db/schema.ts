@@ -13,7 +13,6 @@ const timestamps = {
   deletedAt: t.timestamp("deleted_at"),
 };
 
-//TODO: migrate all ID's to UUID's and ensure using string types in controllers and anywhere that requires ID
 
 export const users = t.pgTable("users", {
   id: t.uuid("id").primaryKey().defaultRandom(),

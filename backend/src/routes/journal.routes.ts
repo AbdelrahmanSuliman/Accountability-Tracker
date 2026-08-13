@@ -15,7 +15,7 @@ import {
   AddictionAndEntryIdParamsSchema,
   AddictionIdParamSchema,
   EntryIdParamsSchema,
-} from "../schema/validation.schema";
+} from "../schema/id.schema";
 
 const journalRouter = express.Router();
 
