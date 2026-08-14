@@ -1,7 +1,6 @@
-import ConfigSchema from "../schema/config.schema";
+import ConfigSchema from "../schema/config.schema.js";
 
-
-export const config = {
+export const config = ConfigSchema.parse({
   port: process.env.PORT,
   database: {
     url: process.env.DATABASE_URL,
@@ -11,8 +10,6 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRATION_TIME,
     secretKey: process.env.JWT_SECRET,
   },
-};
-
-ConfigSchema.parse(config);
+});
 
 export default config;
