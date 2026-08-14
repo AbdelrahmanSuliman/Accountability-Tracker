@@ -142,4 +142,13 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
+# Drizzle fiels
 drizzle
+drizzle.config.js
+drizzle.config.js.map
+drizzle.config.d.ts
+
+# Maps
+*.map
+*.js.map
+*.d.ts.map
