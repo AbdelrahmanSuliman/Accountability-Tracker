@@ -10,6 +10,7 @@ const ConfigSchema = z.object({
     expiresIn: z.string(),
     secretKey: z.string(),
   }),
+  nodeEnv: z.string()
 });
 
 export default ConfigSchema;

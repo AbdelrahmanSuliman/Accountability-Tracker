@@ -17,7 +17,7 @@ invitationRouter.get("/sent", verifyToken, fetchSentInvitationsController);
 invitationRouter.get(
   "/received",
   verifyToken,
-  validateData({params: fetchInvitationSchema}),
+  validateData({query: fetchInvitationSchema}),
   fetchReceivedInvitationsController,
 );
 invitationRouter.post("/", verifyToken, validateData({body: createInvitationSchema}),createInvitationController);

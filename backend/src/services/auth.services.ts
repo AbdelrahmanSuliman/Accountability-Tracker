@@ -4,7 +4,6 @@ import db from "../db/index";
 import * as t from "../db/schema";
 import bcrypt from "bcrypt";
 import config from "../config/index";
-import logger from "../util/logger";
 
 export async function signupService(
   username: string,
@@ -12,69 +11,53 @@ export async function signupService(
   password: string,
 ) {
   const saltRounds = Number(config.saltRounds);
-  try {
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-    const user = await db.query.users.findFirst({
-      where: {
-        email,
-      },
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+  const user = await db.query.users.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (user) throw new AuthenticationError("User already exists");
+
+  const [newUser] = await db
+    .insert(t.users)
+    .values({ username, email, passwordHash })
+    .returning({
+      id: users.id,
+      username: users.username,
+      email: users.email,
     });
 
-    if (user) throw new AuthenticationError("User already exists");
-
-    const [newUser] = await db
-      .insert(t.users)
-      .values({ username, email, passwordHash })
-      .returning({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-      });
-
-    if (!newUser) {
-      throw new AppError("Failed to create user", 500);
-    }
-    return newUser;
-  } catch (err) {
-    if (err instanceof AuthenticationError) {
-      throw err;
-    } else {
-      throw new AppError("Something went wrong during signup", 500);
-    }
+  if (!newUser) {
+    throw new AppError("Failed to create user", 500);
   }
+  return newUser;
 }
 
 export async function loginService(email: string, password: string) {
-  try {
-    const user = await db.query.users.findFirst({
-      where: {
-        email,
-      },
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        passwordHash: true,
-      },
-    });
+  const user = await db.query.users.findFirst({
+    where: {
+      email,
+    },
+    columns: {
+      id: true,
+      email: true,
+      username: true,
+      passwordHash: true,
+    },
+  });
 
-    if (!user) throw new AuthenticationError();
+  if (!user) throw new AuthenticationError();
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new AuthenticationError();
-    }
-
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username
-    };
-  } catch (err) {
-    if (err instanceof AuthenticationError) {
-      throw err;
-    } else {
-      throw new AppError("Something went wrong during login", 500);
-    }
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isPasswordValid) {
+    throw new AuthenticationError();
   }
+
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+  };
 }
