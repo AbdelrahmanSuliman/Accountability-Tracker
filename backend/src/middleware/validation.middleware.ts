@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import type { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
 import { ValidationError, type FieldErrors } from "../util/error";
-import logger from "../util/logger";
 
 interface RequestSchemas {
   body?: z.ZodObject<any, any>;

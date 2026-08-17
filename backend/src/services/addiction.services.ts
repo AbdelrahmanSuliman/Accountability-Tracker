@@ -4,24 +4,17 @@ import * as t from "../db/schema";
 import { AppError, ConflictError, NotFoundError } from "../util/error";
 import { StatusCodes } from "http-status-codes";
 
-export async function createAddictionService(
-  name: string,
-  userId: string,
-) {
-  try {
-    const [newAddiction] = await db
-      .insert(t.addictions)
-      .values({ name, userId })
-      .returning();
-    if (!newAddiction)
-      throw new AppError(
-        "Failed to create addiction",
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-    return newAddiction;
-  } catch (err) {
-    throw err;
-  }
+export async function createAddictionService(name: string, userId: string) {
+  const [newAddiction] = await db
+    .insert(t.addictions)
+    .values({ name, userId })
+    .returning();
+  if (!newAddiction)
+    throw new AppError(
+      "Failed to create addiction",
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  return newAddiction;
 }
 
 export async function fetchAllAddictionsService(
@@ -44,21 +37,30 @@ export async function updateAddictionService(
   addictionName: string,
   userId: string,
 ) {
-  await db
+  const [updatedAddiction] = await db
     .update(t.addictions)
     .set({ name: addictionName })
     .where(
       and(eq(t.addictions.id, addictionId), eq(t.addictions.userId, userId)),
-    );
-}
+    )
+    .returning();
 
+  if (!updatedAddiction) throw new NotFoundError("Addiction not found.");
+}
 export async function deleteAddictionService(
   addictionId: string,
   userId: string,
 ) {
-  await db
+  const [deletedAddiction] = await db
     .delete(t.addictions)
     .where(
       and(eq(t.addictions.id, addictionId), eq(t.addictions.userId, userId)),
-    );
+    )
+    .returning();
+
+  if (!deletedAddiction) {
+    throw new NotFoundError("Addiction not found.");
+  }
+
+  return deletedAddiction;
 }

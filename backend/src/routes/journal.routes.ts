@@ -5,6 +5,7 @@ import {
   deleteJournalEntryController,
   getAllJournalEntriesController,
   updateJournalEntryController,
+  getAllPartneredJournalEntriesController,
 } from "../controllers/journal.controller";
 import { validateData } from "../middleware/validation.middleware";
 import {
@@ -36,6 +37,12 @@ journalRouter.get(
   verifyToken,
   validateData({ params: AddictionIdParamSchema }),
   getAllJournalEntriesController,
+);
+journalRouter.get(
+  "/:addictionId/partnered",
+  verifyToken,
+  validateData({ params: AddictionIdParamSchema }),
+  getAllPartneredJournalEntriesController,
 );
 journalRouter.delete(
   "/addictions/:addictionId/entries/:entryId",
