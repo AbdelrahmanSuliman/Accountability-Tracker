@@ -10,6 +10,7 @@ export const config = ConfigSchema.parse({
     expiresIn: process.env.JWT_EXPIRATION_TIME,
     secretKey: process.env.JWT_SECRET,
   },
+  nodeEnv: process.env.NODE_ENV,
 });
 
 export default config;
