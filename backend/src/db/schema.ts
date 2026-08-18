@@ -63,7 +63,7 @@ export const journalEntries = t.pgTable("journal_entries", {
   content: t.text(),
   succeeded: t.boolean(),
   date: t.date(),
-  addictionId: t.uuid("addiction_id").references(() => addictions.id),
+  addictionId: t.uuid("addiction_id").notNull().references(() => addictions.id),
   ...timestamps,
 });
 
