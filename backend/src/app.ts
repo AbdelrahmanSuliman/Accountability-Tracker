@@ -7,10 +7,16 @@ import authRouter from "./routes/auth.routes";
 import addictionRouter from "./routes/addiction.routes";
 import journalRouter from "./routes/journal.routes";
 import invitationRouter from "./routes/invitation.routes";
+import cors from "cors";
 
 const app = express();
 
 // Global Middleware
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
 app.use(helmet());
 app.use(limiter);
 app.use(express.json());
