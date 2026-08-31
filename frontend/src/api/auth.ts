@@ -1,5 +1,3 @@
-// src/api/auth.ts
-
 import { api } from "@/lib/axios";
 
 export interface SignupData {
@@ -7,8 +5,6 @@ export interface SignupData {
   username: string;
   password: string;
 }
-
-
 export interface SignupResponse {
   message: string;
   data: {
@@ -17,7 +13,22 @@ export interface SignupResponse {
       email: string;
       username: string;
     };
-    token: string;
+  };
+}
+
+export interface LoginData {
+  email: string,
+  password: string
+}
+
+export interface LoginResponse {
+  message: string;
+  data: {
+    user: {
+      id: number;
+      email: string;
+      username: string;
+    };
   };
 }
 export const signup = async (data: SignupData): Promise<SignupResponse> => {
@@ -25,3 +36,9 @@ export const signup = async (data: SignupData): Promise<SignupResponse> => {
 
   return response.data;
 };
+
+export const login = async (data: LoginData): Promise<LoginResponse> => {
+  const response = await api.post("/auth/login", data)
+
+  return response.data
+}
