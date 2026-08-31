@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -7,43 +8,50 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { useNavigate } from "react-router";
-
-import useSignup from "@/hooks/useSignup";
+import useLogin from "@/hooks/useLogin";
 import axios from "axios";
 
-function Signup() {
-  const signupMutation = useSignup();
+function Login() {
+  let navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState<{
-    username?: string[];
     password?: string[];
     email?: string[];
   }>({});
 
-  let navigate = useNavigate();
+  const [authError, setAuthError] = useState("");
 
+  const loginMutation = useLogin();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setValidationErrors({});
 
-    signupMutation.mutate(
-      { email, username, password },
+    setValidationErrors({});
+    setAuthError("");
+
+    loginMutation.mutate(
       {
-        onSuccess: () => {
-          navigate("/home");
-        },
+        email,
+        password,
+      },
+      {
+        onSuccess: () => navigate("/home"),
+
         onError: (error) => {
           if (axios.isAxiosError(error)) {
-            setValidationErrors(error.response?.data.errors);
+            if (error.response?.status === 401) {
+              setAuthError("Invalid email or password");
+              return;
+            }
+
+            setValidationErrors(error.response?.data.errors ?? {});
+          } else {
+            setAuthError(error.message);
           }
         },
       },
@@ -53,11 +61,18 @@ function Signup() {
     <div className="min-h-screen w-full flex flex-row justify-center items-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign up</CardTitle>
-          <CardDescription>Ready to become a Quittr?</CardDescription>
+          <CardTitle>Login to your account</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+          <CardAction>
+            <Button variant="link" onClick={() => navigate("/signup")}>
+              Sign Up
+            </Button>
+          </CardAction>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} id="signup-form">
+          <form onSubmit={handleSubmit} id="login-form">
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -65,22 +80,12 @@ function Signup() {
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  value={email}
                   required
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="JohnDoe123"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-                {validationErrors.username?.map((error) => (
+
+                {validationErrors.email?.map((error) => (
                   <p key={error} className="text-destructive">
                     {error}
                   </p>
@@ -89,32 +94,31 @@ function Signup() {
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    onClick={() => navigate("/login")}
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Already have an account?
+                  <a className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                    Forgot your password?
                   </a>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                 />
-                {validationErrors.password?.map((error) => (
-                  <p key={error} className="text-destructive">
-                    {error}
-                  </p>
-                ))}
               </div>
             </div>
+
+            {validationErrors.password?.map((error) => (
+              <p key={error} className="text-destructive">
+                {error}
+              </p>
+            ))}
           </form>
+          {authError && <p className="text-sm text-destructive">{authError}</p>}
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full" form="signup-form">
-            Signup
+          <Button className="w-full" type="submit" form="login-form">
+            Login
           </Button>
         </CardFooter>
       </Card>
@@ -122,4 +126,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;
