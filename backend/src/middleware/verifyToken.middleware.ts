@@ -5,14 +5,12 @@ import type { Request, Response, NextFunction } from "express";
 import config from "../config";
 import logger from "../util/logger";
 
-
 export default function verifyToken(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     next(new AuthenticationError("Token required"));
@@ -20,7 +18,10 @@ export default function verifyToken(
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secretKey) as unknown as  UserPayload;
+    const decoded = jwt.verify(
+      token,
+      config.jwt.secretKey,
+    ) as unknown as UserPayload;
 
     req.user = decoded;
 

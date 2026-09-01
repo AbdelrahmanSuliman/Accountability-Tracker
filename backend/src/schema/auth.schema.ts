@@ -12,7 +12,7 @@ export const UserLoginSchema = z.object({
   password: z
     .string()
     .nonempty("Password is required")
-    .min(minLength, `Passowrd must be at least ${minLength} characters long`)
+    .min(minLength, `Password must be at least ${minLength} characters long`)
     .max(maxLength),
 });
 
