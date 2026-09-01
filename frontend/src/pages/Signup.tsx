@@ -50,11 +50,14 @@ function Signup() {
     );
   };
   return (
-    <div className="min-h-screen w-full flex flex-row justify-center items-center bg-background">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-background gap-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Sign up</CardTitle>
-          <CardDescription>Ready to become a Quittr?</CardDescription>
+          <CardDescription>
+            Ready to become a{" "}
+            <span className="font-logo font-bold">Quittr</span>?
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} id="signup-form">
