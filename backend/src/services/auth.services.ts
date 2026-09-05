@@ -1,4 +1,4 @@
-import { AppError, AuthenticationError } from "./../util/error";
+import { AppError, AuthenticationError, NotFoundError } from "./../util/error";
 import { users } from "./../db/schema";
 import db from "../db/index";
 import * as t from "../db/schema";
@@ -60,4 +60,16 @@ export async function loginService(email: string, password: string) {
     email: user.email,
     username: user.username,
   };
+}
+
+export async function getCurrentUserService(userId: string) {
+  const user = await db.query.users.findFirst({
+    where: {
+      id: userId
+    }
+  })
+
+  if (!user) throw new NotFoundError("This user does not exist");
+  
+  return user
 }
