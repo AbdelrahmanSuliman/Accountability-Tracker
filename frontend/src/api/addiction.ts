@@ -13,6 +13,6 @@ export interface createAddictionResponse {
 export const createAddiction = async (
   name: string,
 ): Promise<createAddictionResponse> => {
-  const response = await api.post("/addiction", { name });
-  return response.data;
+  const response = await api.post("/addictions", { name });
+  return response.data.data;
 };
