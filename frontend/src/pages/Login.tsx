@@ -63,7 +63,7 @@ function Login() {
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Today you are a <span className="font-logo font-bold">Quittr</span>.
           </CardDescription>
           <CardAction>
             <Button variant="link" onClick={() => navigate("/signup")}>

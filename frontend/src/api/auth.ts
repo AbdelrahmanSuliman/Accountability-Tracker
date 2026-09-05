@@ -42,3 +42,8 @@ export const login = async (data: LoginData): Promise<LoginResponse> => {
 
   return response.data
 }
+
+export const getCurrentUser = async () => {
+  const response = await api.get("/auth/me")
+  return response.data
+}
