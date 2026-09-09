@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import useLogin from "@/hooks/useLogin";
+import useLogin from "@/hooks/auth/useLogin";
 import axios from "axios";
 
 function Login() {

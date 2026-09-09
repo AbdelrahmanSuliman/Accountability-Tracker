@@ -22,7 +22,7 @@ invitationRouter.get(
 );
 invitationRouter.post("/", verifyToken, validateData({body: createInvitationSchema}),createInvitationController);
 invitationRouter.patch(
-  "/:invitationId/accept",
+  "/:token/accept",
   verifyToken,
   validateData({ params: InvitationIdParamSchema }),
   acceptInvitationController,

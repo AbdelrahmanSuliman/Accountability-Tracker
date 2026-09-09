@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCurrentUser } from "@/hooks/auth/useCurrentUser";
 import { Spinner } from "./ui/spinner";
 
 function ProtectedRoute() {

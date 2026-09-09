@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import useCreateAddiction from "@/hooks/useCreateAddictions";
+import useCreateAddiction from "@/hooks/addiction/useCreateAddictions";
+import useCreateInvitation from "@/hooks/invitation/useCreateInvitation";
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,31 +17,53 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
-//TODO: after creating addiction, return the invitation link
+import { useState } from "react";
+import { useGetAddictions } from "@/hooks/addiction/useGetAddictions";
+import AddictionItem from "@/components/AddictionItem";
+import type { Addiction } from "@/api/addiction";
+import { useDeleteAddiction } from "@/hooks/addiction/useDeleteAddiction";
 function Home() {
   {
     /*Add nav*/
   }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const [showInvitationScreen, setShowInvitationScreen] = useState(false);
+  const [invitationLink, setInvitationLink] = useState("");
+  const [currentAddiction, setCurrentAddiction] = useState<Addiction>();
 
+  const createAddictionMutation = useCreateAddiction();
+  const deleteAddictionMutation = useDeleteAddiction()
+  const createInvitationMutation = useCreateInvitation();
+  const getAddictionsQuery = useGetAddictions();
+
+  const onAddictionDeletionSubmit = (addictionId: string) => {
+    console.log(addictionId)
+    deleteAddictionMutation.mutate(addictionId, {
+      onSuccess: () => {
+        console.log("Deleted successfully")
+      },
+      onError: (e) => console.log(e.message)
+    })
+  };
+
+  const onAddictionCreationSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
-
-    console.log(name);
-
     createAddictionMutation.mutate(name, {
       onSuccess: (addiction) => {
-        console.log("Created addiction:", addiction);
-        console.log("Addiction ID:", addiction.id);
+        createInvitationMutation.mutate(addiction.id, {
+          onSuccess: (invitation) => {
+            setInvitationLink(invitation.invitationLink);
+            setShowInvitationScreen(true);
+          },
+        });
       },
     });
   };
 
-  const createAddictionMutation = useCreateAddiction();
   return (
     <div className="min-h-screen w-screen">
       <h1 className="text-center p-8 text-4xl font-logo">Quittr</h1>
@@ -51,8 +74,11 @@ function Home() {
             <Dialog>
               <DialogTrigger render={<Button>Create Addiction</Button>} />
               <DialogContent>
-                <form id="create-addiction-form" onSubmit={onSubmit}>
-                  <DialogHeader>
+                <form
+                  id="create-addiction-form"
+                  onSubmit={onAddictionCreationSubmit}
+                >
+                  <DialogHeader className="py-4">
                     <DialogTitle>Create Addiction</DialogTitle>
 
                     <DialogDescription>
@@ -60,7 +86,7 @@ function Home() {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <label
                       htmlFor="addiction-name"
                       className="text-sm font-medium"
@@ -95,9 +121,18 @@ function Home() {
               <ChevronDown />
             </CollapsibleTrigger>{" "}
             <CollapsibleContent className="mt-2 space-y-2">
-              <div>Smoking</div>
-              <div>Gaming</div>
-              <div>Social Media</div>
+              {getAddictionsQuery.isLoading && <Loader />}
+              {getAddictionsQuery.isError && (
+                <p className="text-destructive">Failed to fetch addictions</p>
+              )}
+              {getAddictionsQuery.data?.map((addiction) => (
+                <AddictionItem
+                  key={addiction.id}
+                  addiction={addiction}
+                  onSelect={() => setCurrentAddiction(addiction)}
+                  onDelete={() => onAddictionDeletionSubmit(addiction.id)}
+                />
+              ))}
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -110,6 +145,39 @@ function Home() {
           <CardContent>{/* Calendar + Journal */}</CardContent>
         </Card>
       </main>
+      <Dialog
+        open={showInvitationScreen}
+        onOpenChange={setShowInvitationScreen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite an Accountability Partner</DialogTitle>{" "}
+            <DialogDescription>
+              Share this link with someone you trust. They can use it to join
+              this addiction as your accountability partner.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Input value={invitationLink} readOnly className="flex-1" />
+            <Button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(invitationLink);
+              }}
+            >
+              Copy
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setShowInvitationScreen(false)}
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
