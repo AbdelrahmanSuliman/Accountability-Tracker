@@ -24,6 +24,7 @@ import { useGetAddictions } from "@/hooks/addiction/useGetAddictions";
 import AddictionItem from "@/components/AddictionItem";
 import type { Addiction } from "@/api/addiction";
 import { useDeleteAddiction } from "@/hooks/addiction/useDeleteAddiction";
+import useLogout from "@/hooks/auth/useLogout";
 function Home() {
   {
     /*Add nav*/
@@ -34,26 +35,33 @@ function Home() {
   const [currentAddiction, setCurrentAddiction] = useState<Addiction>();
 
   const createAddictionMutation = useCreateAddiction();
-  const deleteAddictionMutation = useDeleteAddiction()
+  const deleteAddictionMutation = useDeleteAddiction();
   const createInvitationMutation = useCreateInvitation();
   const getAddictionsQuery = useGetAddictions();
+  const getLogoutMutation = useLogout()
+
+
 
   const onAddictionDeletionSubmit = (addictionId: string) => {
-    console.log(addictionId)
+    console.log(addictionId);
     deleteAddictionMutation.mutate(addictionId, {
       onSuccess: () => {
-        console.log("Deleted successfully")
+        console.log("Deleted successfully");
       },
-      onError: (e) => console.log(e.message)
-    })
+      onError: (e) => console.log(e.message),
+    });
   };
+
+  const onLogout = () => {
+    getLogoutMutation.mutate()
+  }
 
   const onAddictionCreationSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
     createAddictionMutation.mutate(name, {
-      onSuccess: (addiction) => {
+      onSuccess: (addiction) => { 
         createInvitationMutation.mutate(addiction.id, {
           onSuccess: (invitation) => {
             setInvitationLink(invitation.invitationLink);
@@ -66,7 +74,10 @@ function Home() {
 
   return (
     <div className="min-h-screen w-screen">
-      <h1 className="text-center p-8 text-4xl font-logo">Quittr</h1>
+      <div className="flex flex-row justify-between items-center px-4">
+        <h1 className="text-center p-8 text-4xl font-logo">Quittr</h1>
+        <Button onClick={() => onLogout()}>Logout</Button>
+      </div>
       <main className="flex flex-col lg:flex-row gap-6 px-12 min-h-screen">
         <div className="lg:w-1/3 flex flex-col gap-4">
           <div className="flex flex-row justify-between gap-2">

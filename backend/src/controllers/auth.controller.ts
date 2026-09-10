@@ -73,3 +73,22 @@ export async function getCurrentUserController(
     next(err);
   }
 }
+
+export async function logoutController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: config.nodeEnv === "production",
+      sameSite: "lax"
+    })
+    res.status(StatusCodes.OK).json({
+      message: "User logged out successfully"
+    })
+  } catch (err) {
+    next(err)
+  }
+}
